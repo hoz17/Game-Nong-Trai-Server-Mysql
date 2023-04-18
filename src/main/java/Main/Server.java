@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
+
     public static volatile ServerThreadBus serverThreadBus;
     public static Socket socketOfServer;
     public static int ID_room;
@@ -19,6 +20,7 @@ public class Server {
         System.out.println("Server is waiting to accept user...");
         int clientNumber = 0;
         ID_room = 100;
+
 
         try {
             listener = new ServerSocket(7777);
@@ -42,7 +44,7 @@ public class Server {
                 System.out.println(socketOfServer.getInetAddress().getHostAddress());
                 ServerThread serverThread = new ServerThread(socketOfServer, clientNumber++);
                 serverThreadBus.add(serverThread);
-                System.out.println("Số thread đang chạy là: "+serverThreadBus.getLength());
+                System.out.println("Số thread đang chạy là: " + serverThreadBus.getLength());
                 executor.execute(serverThread);
             }
         } catch (IOException ex) {
