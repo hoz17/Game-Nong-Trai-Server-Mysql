@@ -32,7 +32,6 @@ public class ServerThread implements Runnable {
     public ServerThread(Socket socketOfServer, int clientNumber) {
         this.socketOfServer = socketOfServer;
         this.clientNumber = clientNumber;
-//        System.out.println("Server thread number " + clientNumber + " Started");
         userDAO = new UserDAO();
         landDAO = new LandDAO();
         inventoryDAO = new InventoryDAO();
@@ -102,7 +101,6 @@ public class ServerThread implements Runnable {
             String message;
             while (!isClosed) {
                 message = is.readLine();
-                System.out.println("Receive: " + message);
                 if (message == null) {
                     break;
                 }
@@ -111,8 +109,7 @@ public class ServerThread implements Runnable {
                 if (messageSplit[0].equals("client-verify")) {
 //                    System.out.println(message);
                     User user1 = userDAO.verifyUser(new User(messageSplit[1], messageSplit[2]));
-                    if (user1 == null)
-                        write("wrong-user=" + messageSplit[1] + "=" + messageSplit[2]);
+                    if (user1 == null) write("wrong-user=" + messageSplit[1] + "=" + messageSplit[2]);
                     else {
                         write("login-success=" + getStringFromUser(user1));
                         checkDuplicate(user1.getUserID(), this.clientNumber);
@@ -133,6 +130,7 @@ public class ServerThread implements Runnable {
                 if (messageSplit[0].equals("register")) {
                     boolean checkDup = userDAO.checkDuplicated(messageSplit[1]);
                     if (checkDup) write("duplicate-username=");
+                    else if (userDAO.checkDuplicatedName(messageSplit[3])) write("duplicate-playername=");
                     else {
                         User userRegister = new User(messageSplit[1], messageSplit[2], messageSplit[3], Integer.parseInt(messageSplit[4]), Integer.parseInt(messageSplit[5]), Integer.parseInt(messageSplit[6]));
                         userDAO.addUser(userRegister);
@@ -203,7 +201,7 @@ public class ServerThread implements Runnable {
                     if (inventoryExecute == 1 && moneyExecute == 1) {
                         this.user.setMoney(newMoney);
                         this.inventory.setCropAmount(cropID, newCropAmount);
-                        write("sell-seed-complete=" + cropID + "=" + newCropAmount + "=" + newMoney);
+                        write("sell-crop-complete=" + cropID + "=" + newCropAmount + "=" + newMoney);
                     } else {
                         System.out.println("Lỗi database phần bán rau củ");
                     }
@@ -278,21 +276,19 @@ public class ServerThread implements Runnable {
                 if (messageSplit[0].equals("view-leaderboard")) {
                     write("leaderboard=" + userDAO.getLeaderBoard());
                 }
-                //Xử lý chat thế giới
-                if (messageSplit[0].equals("world-chat")) {
-                    Server.serverThreadBus.boardCast(this.clientNumber, "chat-message=" + messageSplit[1]);
-                }
                 //Xử lý xem danh sách thăm nhà
                 if (messageSplit[0].equals("view-visit-list")) {
                     write("visit-list=" + userDAO.getVisitList(messageSplit[1]));
                 }
-                //Xử lý mở túi đồ
-//                if (messageSplit[0].equals("open-inventory")) {
-//
-//                }
                 //Xử lý chat thế giới
                 if (messageSplit[0].equals("world-chat")) {
                     Server.serverThreadBus.mutilCastSend("chat-message=" + messageSplit[1] + "=" + messageSplit[2]);
+                    System.out.println( messageSplit[1] + ": " + messageSplit[2]);
+                }
+                if (messageSplit[0].equals("send-logout")) {
+                    write("logout=0=");
+                    clearData(this);
+
                 }
             }
         } catch (IOException e) {
@@ -309,7 +305,7 @@ public class ServerThread implements Runnable {
 
             //remove thread khỏi bus
             Server.serverThreadBus.remove(clientNumber);
-            System.out.println(this.clientNumber + " đã thoát");
+//            System.out.println(this.clientNumber + " đã thoát");
 
         } catch (SQLException e) {
 //            throw new RuntimeException(e);
@@ -323,7 +319,6 @@ public class ServerThread implements Runnable {
 
     public void write(String message) throws IOException {
         os.write(message);
-        System.out.println("Send: " + message);
         os.newLine();
         os.flush();
     }
@@ -332,15 +327,14 @@ public class ServerThread implements Runnable {
         if (!Server.serverThreadBus.getListServerThreads().isEmpty())
             for (ServerThread serverThread : Server.serverThreadBus.getListServerThreads()) {
                 if (serverThread.getClientNumber() != clientNumber)
-                    if (serverThread.user != null)
-                        if (serverThread.getUser().getUserID() == userID) {
-                            try {
-                                serverThread.write("logout=");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            clearData(serverThread);
+                    if (serverThread.user != null) if (serverThread.getUser().getUserID() == userID) {
+                        try {
+                            serverThread.write("logout=1=");
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
+                        clearData(serverThread);
+                    }
             }
     }
 

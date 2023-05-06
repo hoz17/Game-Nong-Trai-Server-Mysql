@@ -44,7 +44,7 @@ public class Server {
                 System.out.println(socketOfServer.getInetAddress().getHostAddress());
                 ServerThread serverThread = new ServerThread(socketOfServer, clientNumber++);
                 serverThreadBus.add(serverThread);
-                System.out.println("Số thread đang chạy là: " + serverThreadBus.getLength());
+//                System.out.println("Số thread đang chạy là: " + serverThreadBus.getLength());
                 executor.execute(serverThread);
             }
         } catch (IOException ex) {

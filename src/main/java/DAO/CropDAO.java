@@ -20,7 +20,7 @@ public class CropDAO extends DAO {
         int[] cropSellPrice = new int[21];
         int[] waterLevel = new int[21];
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM crop");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM crop;");
             ResultSet rs = preparedStatement.executeQuery();
             for (int i = 0; i < 21 && rs.next(); i++) {
                 cropID[i] = rs.getInt(1);

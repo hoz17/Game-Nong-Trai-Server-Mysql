@@ -13,13 +13,9 @@ public class UserDAO extends DAO {
 
     public User verifyUser(User user) throws SQLException {
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT *\n"
-                    + "FROM player\n"
-                    + "WHERE Username = ?\n"
-                    + "AND Password = ?");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM player WHERE Username = ? AND Password = ?;");
             preparedStatement.setString(1, user.getUsername());
             preparedStatement.setString(2, user.getPassword());
-            System.out.println(preparedStatement);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 return new User(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7));
@@ -33,7 +29,7 @@ public class UserDAO extends DAO {
 
     public void addUser(User user) {
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO player VALUES(?,?,?,?,?,?,?)");
+            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO player VALUES(?,?,?,?,?,?,?);");
             preparedStatement.setString(1, null);
             preparedStatement.setString(2, user.getUsername());
             preparedStatement.setString(3, user.getPassword());
@@ -42,7 +38,7 @@ public class UserDAO extends DAO {
             preparedStatement.setInt(6, user.getGenderSkin());
             preparedStatement.setInt(7, user.getPetID());
             preparedStatement.executeUpdate();
-            preparedStatement = conn.prepareStatement("SELECT Player_ID FROM player WHERE Username=?");
+            preparedStatement = conn.prepareStatement("SELECT Player_ID FROM player WHERE Username=?;");
             preparedStatement.setString(1, user.getUsername());
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
@@ -58,7 +54,7 @@ public class UserDAO extends DAO {
     public void addLand(User user) {
         try {
             for (int i = 0; i < 32; i++) {
-                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO land VALUES(?,?,?,?,null,?,?)");
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO land VALUES(?,?,?,?,null,?,?);");
                 preparedStatement.setString(1, null);
                 preparedStatement.setInt(2, user.getUserID());
                 preparedStatement.setInt(3, i);
@@ -80,7 +76,7 @@ public class UserDAO extends DAO {
     public void addInventory(User user) {
         try {
             for (int i = 0; i < 20; i++) {
-                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO inventory VALUES (?,?,?,?,?)");
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO inventory VALUES (?,?,?,?,?);");
                 preparedStatement.setString(1, null);
                 preparedStatement.setInt(2, user.getUserID());
                 preparedStatement.setInt(3, i);
@@ -97,7 +93,7 @@ public class UserDAO extends DAO {
     public int updateMoney(int userID, int amount) {
         int execute = 0;
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE player SET Money=? WHERE Player_ID=?");
+            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE player SET Money=? WHERE Player_ID=?;");
             preparedStatement.setInt(1, amount);
             preparedStatement.setInt(2, userID);
             execute = preparedStatement.executeUpdate();
@@ -109,8 +105,22 @@ public class UserDAO extends DAO {
 
     public boolean checkDuplicated(String username) {
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM player WHERE Username = ?");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM player WHERE Username = ?;");
             preparedStatement.setString(1, username);
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean checkDuplicatedName(String playerName) {
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM player WHERE Player_name = ?");
+            preparedStatement.setString(1, playerName);
             System.out.println(preparedStatement);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
@@ -125,10 +135,10 @@ public class UserDAO extends DAO {
     public String getLeaderBoard() {
         String output = "";
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT TOP(5) Player_ID, Player_name, Money from player ORDER BY Money DESC");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT Player_name, Money from player ORDER BY Money DESC LIMIT 10;");
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                output += rs.getInt(1) + "=" + rs.getString(2) + "=" + rs.getInt(3) + "=";
+                output += rs.getString(1) + "=" + rs.getInt(2) + "=";
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -139,7 +149,7 @@ public class UserDAO extends DAO {
     public String getVisitList(String input) {
         String output = "";
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT Player_ID, Player_name FROM player WHERE Player_name like '%?%'");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT Player_ID, Player_name FROM player WHERE Player_name like '%?%';");
             preparedStatement.setString(1, input);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
@@ -149,21 +159,5 @@ public class UserDAO extends DAO {
             e.printStackTrace();
         }
         return output;
-    }
-
-    public int plantTree(int userID, int cropID, int slot) {
-        int exe = 0;
-        try {
-
-            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE land SET Crop_ID = ?  WHERE Player_ID = ? AND Slot = ?");
-
-            preparedStatement.setInt(1, cropID);
-            preparedStatement.setInt(2, userID);
-            preparedStatement.setInt(3, slot);
-            exe = preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return exe;
     }
 }

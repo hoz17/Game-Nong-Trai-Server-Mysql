@@ -16,7 +16,7 @@ public class InventoryDAO extends DAO {
         int[] cropAmount = new int[20];
         int[] seedAmount = new int[20];
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM inventory WHERE Player_ID=?");
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM inventory WHERE Player_ID=?;");
             preparedStatement.setInt(1, userID);
             ResultSet rs = preparedStatement.executeQuery();
             for (int i = 0; i < 20 && rs.next(); i++) {
@@ -35,7 +35,7 @@ public class InventoryDAO extends DAO {
     public int updateSeed(int playerID, int cropID, int amount) {
         int execute = 0;
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE inventory SET Seed_amount=? WHERE Player_ID=? AND Crop_ID=?");
+            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE inventory SET Seed_amount=? WHERE Player_ID=? AND Crop_ID=?;");
             preparedStatement.setInt(1, amount);
             preparedStatement.setInt(2, playerID);
             preparedStatement.setInt(3, cropID);
@@ -49,7 +49,7 @@ public class InventoryDAO extends DAO {
     public int updateCrop(int playerID, int cropID, int amount) {
         int execute = 0;
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE inventory SET Crop_amount = ? WHERE Player_ID = ? AND Crop_ID = ?");
+            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE inventory SET Crop_amount = ? WHERE Player_ID = ? AND Crop_ID = ?;");
             preparedStatement.setInt(1, amount);
             preparedStatement.setInt(2, playerID);
             preparedStatement.setInt(3, cropID);
