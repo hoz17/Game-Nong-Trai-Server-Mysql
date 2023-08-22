@@ -8,9 +8,9 @@ public class DAO {
     public static Connection conn;
 
     public DAO() {
-        String jdbcURL = "jdbc:mysql://localhost:3306/gamenongtrai?useSSL=false";
-        String jdbcUsername = "root";
-        String jdbcPassword = "S@obang2002"; //please change information to connect to DB
+        String jdbcURL = "jdbc_url";
+        String jdbcUsername = "username";
+        String jdbcPassword = "password"; //please change information to connect to DB
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
